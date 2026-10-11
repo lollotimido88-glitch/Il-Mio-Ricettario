@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7f4ec">
+<title>Il mio Ricettario</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f7f4ec;color:#302f29;
+font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+header{background:#49634b;color:white;padding:28px 20px}
+header h1{margin:0 0 8px;font-size:27px}
+header p{margin:0;color:#e3e9dc}
+main{max-width:650px;margin:auto;padding:22px 16px}
+input,textarea,select,button{font:inherit;width:100%;
+padding:13px;border-radius:10px}
+input,textarea,select{border:1px solid #d8d5ca;background:white}
+button{border:0;background:#49634b;color:white;
+font-weight:600;cursor:pointer}
+h2{font-size:20px}
+.actions{display:flex;gap:10px;margin:16px 0}
+.actions button{flex:1}
+.card{background:white;border:1px solid #e5e1d7;
+border-radius:14px;padding:16px;margin:12px 0}
+.card h3{margin:0 0 8px}
+.muted{color:#77766e;font-size:14px}
+form{display:grid;gap:12px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+<h1>Il mio Ricettario</h1>
+<p>Le tue ricette, sempre a portata di mano.</p>
+</header>
+<main>
+<input id="search" type="search"
+placeholder="Cerca una ricetta o un ingrediente">
+
+<div class="actions">
+<button id="showList">Le mie ricette</button>
+<button id="showForm">+ Aggiungi</button>
+</div>
+
+<section id="list">
+<h2>Il tuo ricettario</h2>
+<p class="muted" id="count">0 ricette salvate</p>
+<div id="recipes"></div>
+</section>
+
+<section id="editor" class="hidden">
+<h2>Nuova ricetta</h2>
+<form id="recipeForm">
+<input id="title" placeholder="Nome della ricetta" required>
+<select id="category">
+<option>Primi</option>
+<option>Secondi</option>
+<option>Contorni</option>
+<option>Antipasti</option>
+<option>Dolci</option>
+<option>Pane e pizze</option>
+<option>Altro</option>
+</select>
+<textarea id="ingredients" rows="5"
+placeholder="Ingredienti e dosi" required></textarea>
+<textarea id="method" rows="6"
+placeholder="Procedimento"></textarea>
+<button type="submit">Salva ricetta</button>
+<button type="button" id="cancel"
+style="background:#777">Annulla</button>
+</form>
+</section>
+</main>
+<script>
+const key="ricettario_v1";
+let recipes=[];
+try{recipes=JSON.parse(localStorage.getItem(key)||"[]")}
+catch(e){recipes=[]}
+
+const $=id=>document.getElementById(id);
+function save(){
+localStorage.setItem(key,JSON.stringify(recipes));
+render();
+}
+function render(){
+const q=$("search").value.trim().toLowerCase();
+const filtered=recipes.filter(r=>
+(r.title+" "+r.ingredients+" "+r.category)
+.toLowerCase().includes(q));
+$("count").textContent=recipes.length+
+(recipes.length===1?" ricetta salvata":" ricette salvate");
+$("recipes").innerHTML="";
+if(!filtered.length){
+$("recipes").innerHTML='<div class="card"><p>'+
+(recipes.length?"Nessun risultato trovato.":
+"Il tuo ricettario è vuoto. Aggiungi la prima ricetta!")+
+'</p></div>';
+return;
+}
+filtered.forEach(r=>{
+const card=document.createElement("article");
+card.className="card";
+const title=document.createElement("h3");
+title.textContent=r.title;
+const category=document.createElement("p");
+category.className="muted";
+category.textContent=r.category;
+const ingredients=document.createElement("p");
+ingredients.textContent=r.ingredients;
+const details=document.createElement("details");
+const summary=document.createElement("summary");
+summary.textContent="Leggi il procedimento";
+const method=document.createElement("p");
+method.textContent=r.method||"Nessun procedimento inserito.";
+details.append(summary,method);
+card.append(title,category,ingredients,details);
+$("recipes").append(card);
+});
+}
+$("showForm").onclick=()=>{
+$("list").classList.add("hidden");
+$("editor").classList.remove("hidden");
+};
+$("showList").onclick=()=>{
+$("editor").classList.add("hidden");
+$("list").classList.remove("hidden");
+};
+$("cancel").onclick=()=>{
+$("editor").classList.add("hidden");
+$("list").classList.remove("hidden");
+};
+$("search").oninput=render;
+$("recipeForm").onsubmit=e=>{
+e.preventDefault();
+recipes.push({
+title:$("title").value.trim(),
+category:$("category").value,
+ingredients:$("ingredients").value.trim(),
+method:$("method").value.trim()
+});
+save();
+$("recipeForm").reset();
+$("editor").classList.add("hidden");
+$("list").classList.remove("hidden");
+};
+render();
+</script>
+</body>
+</html>
