@@ -115,7 +115,16 @@ summary.textContent="Leggi il procedimento";
 const method=document.createElement("p");
 method.textContent=r.method||"Nessun procedimento inserito.";
 details.append(summary,method);
-card.append(title,category,ingredients,details);
+  const deleteButton=document.createElement("button");
+deleteButton.textContent="Elimina";
+deleteButton.onclick=()=>{
+  if(confirm("Vuoi eliminare la ricetta "+r.title+"?")){
+    recipes=recipes.filter(recipe=>recipe!==r);
+    save();
+    render();
+  }
+};
+card.append(title,category,ingredients,details,deleteButton);
 $("recipes").append(card);
 });
 }
