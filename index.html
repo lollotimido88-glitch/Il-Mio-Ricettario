@@ -146,6 +146,24 @@ $("editor").classList.add("hidden");
 $("list").classList.remove("hidden");
 };
 render();
+  const backupButton = document.createElement("button");
+backupButton.textContent = "Esporta backup";
+backupButton.style.marginTop = "16px";
+
+backupButton.onclick = () => {
+  const data = JSON.stringify(recipes, null, 2);
+  const file = new Blob([data], {
+    type: "application/json"
+  });
+  const url = URL.createObjectURL(file);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "backup-ricettario.json";
+  link.click();
+  URL.revokeObjectURL(url);
+};
+
+document.querySelector("main").appendChild(backupButton);
 </script>
 </body>
 </html>
