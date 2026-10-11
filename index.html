@@ -164,6 +164,52 @@ backupButton.onclick = () => {
 };
 
 document.querySelector("main").appendChild(backupButton);
+  const importButton = document.createElement("button");
+importButton.textContent = "Importa backup";
+importButton.style.marginTop = "10px";
+
+const fileInput = document.createElement("input");
+fileInput.type = "file";
+fileInput.accept = ".json,application/json";
+fileInput.style.display = "none";
+document.querySelector("main").appendChild(fileInput);
+
+importButton.onclick = () => fileInput.click();
+
+fileInput.onchange = async () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  try {
+    const imported = JSON.parse(await file.text());
+
+    if (!Array.isArray(imported) ||
+        !imported.every(r =>
+          r &&
+          typeof r.title === "string" &&
+          typeof r.category === "string" &&
+          typeof r.ingredients === "string" &&
+          typeof r.method === "string"
+        )) {
+      alert("Il file non è un backup valido.");
+      return;
+    }
+
+    if (!confirm(
+      "Importare il backup e sostituire tutte le ricette attuali?"
+    )) return;
+
+    recipes = imported;
+    save();
+    alert("Backup importato correttamente.");
+  } catch {
+    alert("Impossibile leggere il file selezionato.");
+  } finally {
+    fileInput.value = "";
+  }
+};
+
+document.querySelector("main").appendChild(importButton);
 </script>
 </body>
 </html>
